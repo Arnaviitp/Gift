@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A Wedding Wish: Bhaiya & Bhabhi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Lato", sans-serif;
+        background-color: #fdf2f8; /* Rose-50 */
+      }
+      h1,
+      h2,
+      h3,
+      .serif-font {
+        font-family: "Playfair Display", serif;
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 300px;
+        max-height: 400px;
+      }
+      .fade-in {
+        animation: fadeIn 0.8s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .nav-item.active {
+        border-bottom: 2px solid #db2777; /* Pink-600 */
+        color: #be185d; /* Pink-700 */
+        font-weight: 700;
+      }
+    </style>
+    <!-- Chosen Palette: Rose & Warm Neutrals (Calm, Romantic, Serene) -->
+    <!-- Application Structure Plan: 
+         1. Hero Section: Visual introduction with the primary couple photo.
+         2. Narrative Dashboard: A tabbed interface allowing exploration of different dimensions of the wish:
+            - "The Union": Profiles of Bhaiya and Bhabhi derived from the text.
+            - "The Metaphor": Interactive breakdown of the "Lotus" symbolism (Roots, Rise, Bloom).
+            - "The Forecast": Playful data visualization of the "Lifetime Wishes" (Laughter, Support, Adventure).
+         3. The Message: The full textual wish presented as a formal letter.
+         Reasoning: This structure turns a linear text into an emotional journey, allowing the user to dwell on the specific compliments (Strength/Light) and the deep symbolism of the Lotus before reading the final wish.
+    -->
+    <!-- Visualization & Content Choices:
+         - Goal: Inform -> "The Union" -> Card Layout -> Displaying character traits (Strength, Light) extracted from text.
+         - Goal: Change/Process -> "The Metaphor" -> Step-by-Step Flow -> Users click through the stages of a lotus (Trust -> Resilience -> Beauty) to understand the depth of the wish.
+         - Goal: Relationships -> "The Forecast" -> Doughnut Chart (Chart.js) -> Visualizing the "ingredients" of the wish (Laughter, Support, Adventure) mentioned in the text.
+         - Goal: Context -> "Happiness Projection" -> Line Chart (Chart.js) -> A playful "up and to the right" graph showing infinite happiness over time.
+         - Confirming NO SVG/Mermaid. Used Chart.js for visuals and HTML/CSS for structure.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+  </head>
+  <body class="text-gray-700">
+    <!-- Main Container -->
+    <div
+      class="max-w-5xl mx-auto min-h-screen bg-white shadow-xl overflow-hidden flex flex-col"
+    >
+      <!-- Header / Hero -->
+      <header
+        class="relative bg-rose-100 p-8 text-center border-b border-rose-200"
+      >
+        <h1 class="text-3xl md:text-5xl text-rose-800 mb-2">
+          A Celebration of Love
+        </h1>
+        <p class="text-lg text-rose-600 italic serif-font">
+          For my dearest Bhaiya & Bhabhi
+        </p>
+      </header>
+
+      <!-- Navigation -->
+      <nav
+        class="flex justify-center space-x-4 md:space-x-8 bg-white p-4 shadow-sm sticky top-0 z-10"
+      >
+        <button
+          onclick="navigate('overview')"
+          id="nav-overview"
+          class="nav-item active px-3 py-2 text-gray-500 hover:text-rose-600 transition"
+        >
+          The Couple
+        </button>
+        <button
+          onclick="navigate('metaphor')"
+          id="nav-metaphor"
+          class="nav-item px-3 py-2 text-gray-500 hover:text-rose-600 transition"
+        >
+          The Lotus Story
+        </button>
+        <button
+          onclick="navigate('wishes')"
+          id="nav-wishes"
+          class="nav-item px-3 py-2 text-gray-500 hover:text-rose-600 transition"
+        >
+          Future Forecast
+        </button>
+        <button
+          onclick="navigate('letter')"
+          id="nav-letter"
+          class="nav-item px-3 py-2 text-gray-500 hover:text-rose-600 transition"
+        >
+          The Wish
+        </button>
+      </nav>
+
+      <!-- Content Area -->
+      <main
+        id="content-area"
+        class="flex-grow p-6 md:p-10 bg-gradient-to-b from-white to-rose-50"
+      >
+        <!-- Content injected via JS -->
+      </main>
+
+      <!-- Footer -->
+      <footer class="bg-rose-900 text-rose-100 p-6 text-center">
+        <p class="serif-font text-lg">
+          "May your married life be forever blessed and happy!"
+        </p>
+        <p class="text-sm mt-2 opacity-75">With all my love</p>
+      </footer>
+    </div>
+
+    <script>
+      // --- Data & State ---
+      const state = {
+        currentTab: "overview",
+      };
+
+      const contentData = {
+        overview: {
+          title: "The Perfect Union",
+          intro:
+            "Based on the beautiful moments captured in the lotus pond, we celebrate the unique qualities you both bring to this marriage. This section highlights the balance of strength and radiance that defines your relationship.",
+          image: "image_4cf471.jpg",
+          profiles: [
+            {
+              name: "Bhaiya",
+              role: "The Pillar",
+              desc: "Described as a pillar of strength and wisdom. He provides the grounding and stability for the family, much like the roots that hold firm beneath the water.",
+              icon: "⚓",
+            },
+            {
+              name: "Bhabhi",
+              role: "The Radiant Light",
+              desc: "She is the radiant light that illuminates the entire family. Her presence brings warmth, joy, and beauty to every moment, just like the blooming flower.",
+              icon: "✨",
+            },
+          ],
+        },
+        metaphor: {
+          title: "The Wisdom of the Lotus",
+          intro:
+            "Your wedding photos amidst the lotuses are not just beautiful; they are symbolic. The wish draws a parallel between your love story and the lifecycle of this sacred flower. Click the stages below to explore the deeper meaning.",
+          stages: [
+            {
+              stage: "Rooted in Trust",
+              detail:
+                "Just as the lotus is anchored in the mud, your relationship is grounded in deep trust. This invisible bond is what allows you to withstand any current.",
+              color: "bg-emerald-100 text-emerald-800",
+            },
+            {
+              stage: "Rising with Grace",
+              detail:
+                "The lotus rises through the water to reach the surface. Similarly, your love will rise gracefully above all challenges, remaining untouched and pure.",
+              color: "bg-teal-100 text-teal-800",
+            },
+            {
+              stage: "Blossoming Beauty",
+              detail:
+                "Finally, the flower opens to the sun. This represents your life together—blossoming with incredible beauty every single day, for all to see.",
+              color: "bg-pink-100 text-pink-800",
+            },
+          ],
+        },
+        wishes: {
+          title: "Forecast for the Future",
+          intro:
+            "Based on the heartfelt wishes expressed, here is a projection of the key ingredients that will make up your lifetime of happiness. These data points represent the core values of your journey ahead.",
+          // Chart data handled in render function
+        },
+        letter: {
+          title: "My Heartfelt Wish",
+          intro:
+            "Bringing it all together, here is the complete message dedicated to you both as you embark on this incredible journey.",
+          text: `To my dearest Bhaiya and Bhabhi,
+
+Looking at your stunning photos amidst the lotuses, I see a bond as pure and serene as the calm water that cradles them. You two truly embody the beauty of a tranquil, yet vibrant love story—a perfect, blossoming dream come true.
+
+Bhaiya, you have always been a pillar of strength and wisdom for me, and Bhabhi, you are the radiant light that now illuminates our entire family.
+
+As you set sail on this incredible journey of marriage, may your love be like the lotus—rooted deeply in trust, rising gracefully above all challenges, and blossoming with incredible beauty every single day. I wish you a lifetime overflowing with shared laughter, unwavering support, and an endless, romantic adventure.
+
+May your married life be forever blessed and happy!`,
+        },
+      };
+
+      // --- Core Functions ---
+
+      function init() {
+        navigate("overview");
+      }
+
+      function navigate(tabId) {
+        state.currentTab = tabId;
+
+        // Update Nav Styles
+        document.querySelectorAll(".nav-item").forEach((el) => {
+          el.classList.remove("active");
+        });
+        document.getElementById(`nav-${tabId}`).classList.add("active");
+
+        // Render Content
+        const container = document.getElementById("content-area");
+        container.innerHTML = ""; // Clear current
+
+        // Add fade animation class
+        container.classList.remove("fade-in");
+        void container.offsetWidth; // trigger reflow
+        container.classList.add("fade-in");
+
+        switch (tabId) {
+          case "overview":
+            renderOverview(container);
+            break;
+          case "metaphor":
+            renderMetaphor(container);
+            break;
+          case "wishes":
+            renderWishes(container);
+            break;
+          case "letter":
+            renderLetter(container);
+            break;
+        }
+      }
+
+      // --- Renderers ---
+
+      function renderOverview(container) {
+        const data = contentData.overview;
+
+        let html = `
+                <div class="space-y-8">
+                    <div class="text-center max-w-2xl mx-auto mb-8">
+                        <h2 class="text-3xl text-rose-900 mb-4 serif-font">${
+                          data.title
+                        }</h2>
+                        <p class="text-gray-600 leading-relaxed">${
+                          data.intro
+                        }</p>
+                    </div>
+
+                    <div class="rounded-xl overflow-hidden shadow-lg mb-8 border-4 border-white">
+                        <img src="${
+                          img.jpg
+                        }" alt="Bhaiya and Bhabhi with Umbrella" class="w-full h-auto object-cover max-h-[500px] object-center">
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        ${data.profiles
+                          .map(
+                            (p) => `
+                            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-rose-300 hover:shadow-lg transition transform hover:-translate-y-1">
+                                <div class="text-4xl mb-4 text-center">${p.icon}</div>
+                                <h3 class="text-xl font-bold text-center text-gray-800 mb-2">${p.name}</h3>
+                                <div class="text-center text-rose-600 font-semibold mb-4 text-sm uppercase tracking-wider">${p.role}</div>
+                                <p class="text-gray-600 text-center text-sm leading-relaxed">${p.desc}</p>
+                            </div>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                </div>
+            `;
+        container.innerHTML = html;
+      }
+
+      function renderMetaphor(container) {
+        const data = contentData.metaphor;
+
+        let html = `
+                <div class="space-y-8">
+                    <div class="text-center max-w-2xl mx-auto">
+                        <h2 class="text-3xl text-rose-900 mb-4 serif-font">${
+                          data.title
+                        }</h2>
+                        <p class="text-gray-600 leading-relaxed mb-6">${
+                          data.intro
+                        }</p>
+                    </div>
+
+                    <!-- Interactive Image Context -->
+                    <div class="relative rounded-xl overflow-hidden shadow-lg max-w-3xl mx-auto mb-10">
+                         <img src="image_4cf16f.jpg" alt="Couple in Lotus Pond" class="w-full h-auto opacity-90 hover:opacity-100 transition duration-500">
+                         <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent p-6">
+                             <p class="text-white italic text-center text-lg serif-font">"A bond as pure and serene as the calm water..."</p>
+                         </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-4">
+                        ${data.stages
+                          .map(
+                            (stage, index) => `
+                            <div class="group relative">
+                                <div class="${
+                                  stage.color
+                                } p-6 rounded-lg h-full flex flex-col items-center justify-center shadow-sm hover:shadow-md transition">
+                                    <div class="text-3xl mb-3 opacity-80">🪷</div>
+                                    <h4 class="font-bold text-lg mb-2">${
+                                      stage.stage
+                                    }</h4>
+                                    <p class="text-xs uppercase tracking-widest opacity-60">Step ${
+                                      index + 1
+                                    }</p>
+                                    <div class="mt-4 text-sm text-center leading-relaxed">
+                                        ${stage.detail}
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                </div>
+            `;
+        container.innerHTML = html;
+      }
+
+      function renderWishes(container) {
+        const data = contentData.wishes;
+
+        container.innerHTML = `
+                <div class="space-y-8">
+                    <div class="text-center max-w-2xl mx-auto">
+                        <h2 class="text-3xl text-rose-900 mb-4 serif-font">${data.title}</h2>
+                        <p class="text-gray-600 leading-relaxed">${data.intro}</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8 items-center mt-8">
+                        
+                        <!-- Chart 1: Composition -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-rose-100">
+                            <h3 class="text-center font-bold text-gray-700 mb-4">Recipe for a Happy Marriage</h3>
+                            <div class="chart-container">
+                                <canvas id="ingredientsChart"></canvas>
+                            </div>
+                            <p class="text-center text-xs text-gray-500 mt-4 italic">Source: The Wedding Wish Text</p>
+                        </div>
+
+                        <!-- Chart 2: Projection -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-rose-100">
+                            <h3 class="text-center font-bold text-gray-700 mb-4">Projected Happiness Levels</h3>
+                            <div class="chart-container">
+                                <canvas id="happinessChart"></canvas>
+                            </div>
+                            <p class="text-center text-xs text-gray-500 mt-4 italic">Trend: Always Rising</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-rose-50 p-6 rounded-lg text-center border border-rose-200">
+                        <span class="text-2xl mr-2">❤️</span>
+                        <span class="serif-font text-xl text-rose-800">"An endless, romantic adventure."</span>
+                    </div>
+                </div>
+            `;
+
+        // Initialize Charts after DOM injection
+        setTimeout(() => {
+          initCharts();
+        }, 100);
+      }
+
+      function renderLetter(container) {
+        const data = contentData.letter;
+
+        container.innerHTML = `
+                <div class="max-w-3xl mx-auto">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl text-rose-900 mb-2 serif-font">${data.title}</h2>
+                        <p class="text-gray-500 text-sm">${data.intro}</p>
+                    </div>
+                    
+                    <div class="bg-white p-8 md:p-12 shadow-xl rounded-sm relative border border-gray-100">
+                        <!-- Decorative corners -->
+                        <div class="absolute top-4 left-4 text-rose-200 text-4xl leading-none">❝</div>
+                        <div class="absolute bottom-4 right-4 text-rose-200 text-4xl leading-none">❞</div>
+                        
+                        <div class="serif-font text-lg md:text-xl text-gray-700 leading-loose whitespace-pre-wrap font-medium">
+${data.text}
+                        </div>
+                        
+                        <div class="mt-8 pt-8 border-t border-gray-100 text-right">
+                            <p class="font-bold text-rose-600 script-font text-xl">With all my love,</p>
+                            <p class="text-gray-800 font-bold mt-2">Arnav Anand (IITIAN)</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+      }
+
+      // --- Chart Logic ---
+
+      function initCharts() {
+        // Chart 1: Ingredients Doughnut
+        const ctx1 = document.getElementById("ingredientsChart");
+        if (ctx1) {
+          new Chart(ctx1, {
+            type: "doughnut",
+            data: {
+              labels: [
+                "Shared Laughter",
+                "Unwavering Support",
+                "Romantic Adventure",
+                "Deep Trust",
+              ],
+              datasets: [
+                {
+                  data: [25, 25, 25, 25],
+                  backgroundColor: [
+                    "#FBCFE8", // Pink 200
+                    "#F472B6", // Pink 400
+                    "#DB2777", // Pink 600
+                    "#9D174D", // Pink 800
+                  ],
+                  borderWidth: 0,
+                  hoverOffset: 10,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: "bottom",
+                  labels: {
+                    font: { family: "'Lato', sans-serif" },
+                    usePointStyle: true,
+                  },
+                },
+              },
+            },
+          });
+        }
+
+        // Chart 2: Happiness Line
+        const ctx2 = document.getElementById("happinessChart");
+        if (ctx2) {
+          new Chart(ctx2, {
+            type: "line",
+            data: {
+              labels: [
+                "Today",
+                "Year 1",
+                "Year 5",
+                "Year 10",
+                "Year 25",
+                "Year 50",
+                "Forever",
+              ],
+              datasets: [
+                {
+                  label: "Love & Joy",
+                  data: [100, 120, 180, 250, 400, 700, 1000],
+                  borderColor: "#DB2777",
+                  backgroundColor: "rgba(219, 39, 119, 0.1)",
+                  tension: 0.4,
+                  fill: true,
+                  pointRadius: 4,
+                  pointBackgroundColor: "#fff",
+                  pointBorderColor: "#DB2777",
+                  pointBorderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  display: false, // Hide numbers for abstract feel
+                },
+                x: {
+                  grid: { display: false },
+                },
+              },
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      return "Status: Blossoming";
+                    },
+                  },
+                },
+              },
+            },
+          });
+        }
+      }
+
+      // Initialize App
+      window.onload = init;
+    </script>
+  </body>
+</html>
